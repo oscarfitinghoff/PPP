@@ -33,6 +33,19 @@
 </template>
 
 <script>
+import Firebase from 'firebase'
+import Settings from './Settings'
+
+const config = {
+  apiKey: Settings.apiKey,
+  authDomain: Settings.authDomain,
+  databaseURL: Settings.databaseURL
+}
+const app = Firebase.initializeApp(config)
+const db = app.database()
+const gamesRef = db.ref('games')
+
+
 export default {
   name: 'AddGame',
   data() {
@@ -91,7 +104,8 @@ export default {
       this.done = false
     },
     addGame() {
-      this.$router.push('Standings')
+      gamesRef.push(this.game)
+      // this.$router.push('Standings')
     },
     checkIfDone() {
       if (this.game[0].name.length !== 0 && this.game[1].name.length !== 0) {
