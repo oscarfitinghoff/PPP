@@ -3,7 +3,7 @@
     <h1>{{ msg }}</h1>
     <div class="c-standings">
       <table class="c-standings__table">
-        <tr v-for="item in standings" :key="item.id">
+        <tr v-for="item in players" :key="item.id">
           <td>{{ item.name }}</td>
           <td>{{ item.wins }}</td>
           <td>{{ item.losses }}</td>
@@ -15,31 +15,25 @@
 </template>
 
 <script>
+import Firebase from 'firebase'
+
+const config = {
+  version: 'v0_1'
+}
+const db = Firebase.database()
+// const gamesRef = db.ref(`${config.version}/games`)
+const playersRef = db.ref(`${config.version}/players`)
+
 export default {
   name: 'Standings',
+  firebase() {
+    return {
+      players: playersRef
+    }
+  },
   data() {
     return {
-      msg: 'Standings',
-      standings: [
-        {
-          name: 'Leif',
-          wins: 4,
-          losses: 2,
-          diff: 2
-        },
-        {
-          name: 'Arne',
-          wins: 3,
-          losses: 2,
-          diff: 1
-        },
-        {
-          name: 'Leif',
-          wins: 2,
-          losses: 4,
-          diff: -2
-        }
-      ]
+      msg: 'Standings'
     }
   }
 }

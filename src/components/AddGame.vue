@@ -1,9 +1,9 @@
 <template>
   <div class="o-content">
-    <h1 class="c-page-start">{{ msg }}</h1>
+    <h1 class="c-page-start">{{ title }}</h1>
     <div class="c-competitors">
       <div class="c-competitors__item">
-        <h3 class="c-competitors__heading">Winner</h3>
+        <h3 class="c-competitors__heading">Vinnare</h3>
         <div class="c-competitor" @click="removePlayer('0')" v-bind:class="{ 'is-active': game[0].name.length > 0 }">
           <div class="c-competitor__img-wrapper">
             <img src="" alt="">
@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="c-competitors__item">
-        <h3 class="c-competitors__heading">Loser</h3>
+        <h3 class="c-competitors__heading">Förlorare</h3>
         <div class="c-competitor" @click="removePlayer('1')" v-bind:class="{ 'is-active': game[1].name.length > 0 }">
           <div class="c-competitor__img-wrapper">
             <img src="" alt="">
@@ -22,96 +22,129 @@
       </div>
     </div>
     <div class="c-add-game" v-if="done">
-      <button class="c-btn c-add-game__action" @click="addGame">Add Game</button>
+      <button class="c-btn c-add-game__action" @click="addGame">Lägg till match</button>
     </div>
     <div class="c-players" v-else>
-      <div class="c-players__item" v-for="item in selections" :key="item.id">
-        <div class="c-player" @click="addPlayer(item)">{{ item.name }}</div>
+      <div class="c-players__item" v-for="player in players" :key="player.id">
+        <div class="c-player" @click="addPlayer(player)">{{ player.name }}</div>
+      </div>
+      {{selections}}
+      <div class="c-players__add">
+        <input class="" type="text" v-model="newPlayer">
+        <button class="" type="button" @click="createPlayer(newPlayer)">Lägg till spelare</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+
 import Firebase from 'firebase'
-import Settings from './Settings'
 
 const config = {
-  apiKey: Settings.apiKey,
-  authDomain: Settings.authDomain,
-  databaseURL: Settings.databaseURL
+  version: 'v0_1'
 }
-const app = Firebase.initializeApp(config)
-const db = app.database()
-const gamesRef = db.ref('games')
-
+const db = Firebase.database()
+const gamesRef = db.ref(`${config.version}/games`)
+const playersRef = db.ref(`${config.version}/players`)
 
 export default {
   name: 'AddGame',
+  firebase() {
+    return {
+      players: playersRef,
+      playersObj: {
+        source: playersRef,
+        asObject: true
+      }
+    }
+  },
   data() {
     return {
-      msg: 'Add Game',
+      title: 'Ny match',
       done: false,
       game: [
         {
+          key: '',
           name: '',
-          img: ''
+          img: '',
+          aka: ''
         },
         {
+          key: '',
           name: '',
-          img: ''
+          img: '',
+          aka: ''
         }
       ],
-      selections: [
-        {
-          name: 'Leif',
-          img: '../assets/icons/128_1.png'
-        },
-        {
-          name: 'Arne',
-          img: '../assets/icons/128_1.png'
-        },
-        {
-          name: 'Anders',
-          img: '../assets/icons/128_1.png'
-        },
-        {
-          name: 'Björn',
-          img: '../assets/icons/128_1.png'
-        },
-        {
-          name: 'Arnold',
-          img: '../assets/icons/128_1.png'
-        }
-      ]
+      selections: this.players,
+      newPlayer: ''
     }
   },
   methods: {
-    addPlayer(item) {
+    addPlayer(player) {
       let index
       if (this.game[0].name.length === 0) {
         index = 0
       } else if (this.game[1].name.length === 0) {
         index = 1
       }
-      this.game[index].name = item.name
-      this.game[index].img = item.img
+      this.game[index].key = player['.key']
+      this.game[index].name = player.name
       this.checkIfDone()
     },
     removePlayer(player) {
+      this.game[player].key = ''
       this.game[player].name = ''
       this.game[player].img = ''
       this.done = false
-    },
-    addGame() {
-      gamesRef.push(this.game)
-      // this.$router.push('Standings')
     },
     checkIfDone() {
       if (this.game[0].name.length !== 0 && this.game[1].name.length !== 0) {
         this.done = true
       } else {
         this.done = false
+      }
+    },
+    addGame() {
+      gamesRef.push(this.game)
+      this.updatePlayers(this.game)
+    },
+    updatePlayers(game) {
+      const winner = this.updateWinner({ ...game[0] })
+      const loser = this.updateLoser({ ...game[1] })
+
+      playersRef.child(game[0].key).set(winner)
+      playersRef.child(game[1].key).set(loser)
+    },
+    updateWinner(player) {
+      const temp = this.playersObj[player.key]
+      temp.wins += 1
+      temp.losses = temp.losses
+      temp.diff += 1
+      delete temp['.key']
+      return temp
+    },
+    updateLoser(player) {
+      const temp = this.playersObj[player.key]
+      temp.wins = temp.wins
+      temp.losses += 1
+      temp.diff -= 1
+      delete temp['.key']
+      return temp
+    },
+    createPlayer(player) {
+      if (player.length) {
+        const newPlayer = {
+          name: player,
+          img: '',
+          aka: '',
+          wins: 0,
+          losses: 0,
+          diff: 0
+        }
+        playersRef.push(newPlayer)
+        // this.updateStanding(newPlayer)
       }
     }
   }
