@@ -1,13 +1,20 @@
 <template>
   <div class="o-content">
-    <h1>{{ msg }}</h1>
     <div class="c-standings">
-      <table class="c-standings__table">
-        <tr v-for="item in players" :key="item.id">
-          <td>{{ item.name }}</td>
-          <td>{{ item.wins }}</td>
-          <td>{{ item.losses }}</td>
-          <td>{{ item.diff }}</td>
+      <table class="table c-table">
+        <thead>
+          <tr>
+            <th>Namn</th>
+            <th>Vinster</th>
+            <th>Förluster</th>
+            <th>+/-</th>
+          </tr>
+        </thead>
+        <tr v-for="item in reverse" :key="item.id">
+          <td class="c-table__max">{{ item.name }}</td>
+          <td class="c-table__number">{{ item.wins }}</td>
+          <td class="c-table__number">{{ item.losses }}</td>
+          <td class="c-table__number">{{ item.diff }}</td>
         </tr>
       </table>
     </div>
@@ -26,14 +33,17 @@ const playersRef = db.ref(`${config.version}/players`)
 
 export default {
   name: 'Standings',
-  firebase() {
-    return {
-      players: playersRef
-    }
+  firebase: {
+    players: playersRef.orderByChild('wins')
   },
   data() {
     return {
-      msg: 'Standings'
+      msg: 'Tabell'
+    }
+  },
+  computed: {
+    reverse() {
+      return this.players.reverse()
     }
   }
 }
@@ -42,4 +52,13 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../assets/scss/5_objects/objects.content";
+.c-table {
+  width: 100%;
+  &__max {
+    width: 99%;
+  }
+  &__number {
+    text-align: right;
+  }
+}
 </style>

@@ -28,10 +28,16 @@
       <div class="c-players__item" v-for="player in players" :key="player.id">
         <div class="c-player" @click="addPlayer(player)">{{ player.name }}</div>
       </div>
-      {{selections}}
-      <div class="c-players__add">
-        <input class="" type="text" v-model="newPlayer">
-        <button class="" type="button" @click="createPlayer(newPlayer)">Lägg till spelare</button>
+    </div>
+    <div class="c-create-player">
+      <h3>Lägg till ny spelare</h3>
+      <div class="field has-addons">
+        <div class="control is-expanded">
+          <input class="input" type="text" v-model="newPlayer">
+        </div>
+        <div class="control">
+          <a class="button is-link" type="button" @click="createPlayer(newPlayer)">Lägg till spelare</a>
+        </div>
       </div>
     </div>
   </div>
@@ -214,7 +220,11 @@ export default {
   background: $midnight;
   border-radius: $global-radius;
   color: $white;
+  font-size: 1.2rem;
   text-align: center;
   cursor: pointer;
+}
+.c-create-player {
+  padding: $spacing-small;
 }
 </style>

@@ -1,15 +1,13 @@
 <template>
   <div id="app" class="o-content">
     <header class="">
-      <nav class="c-navigation">
-        <ul class="c-navigation__list">
-          <li class="c-navigation__item">
-            <router-link to="/">Ny match</router-link>
-          </li>
-          <li class="c-navigation__item">
-            <router-link to="/Standings">Tabell</router-link>
-          </li>
-        </ul>
+      <nav class="navbar is-info">
+        <div class="navbar-menu">
+          <div class="navbar-start">
+            <router-link to="/" class="navbar-item">Ny match</router-link>
+            <router-link to="/Standings" class="navbar-item">Tabell</router-link>
+          </div>
+        </div>
       </nav>
     </header>
     <div class="c-logo">
@@ -50,19 +48,6 @@ body {
 .c-logo {
   margin: 0 auto;
   width: 10rem;
-}
-.c-navigation {
-  &__list {
-    display: flex;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  &__item {
-    &:not(:first-child) {
-      margin-left: $spacing-small;
-    }
-  }
 }
 </style>
 
