@@ -1,5 +1,9 @@
 <template>
   <div class="o-content">
+    <div class="c-logo">
+      <img class="c-logo__img" src="../assets/soccer-cup.svg">
+    </div>
+    <h1 class="c-page-start">{{ title }}</h1>
     <div class="c-standings">
       <table class="table c-table">
         <thead>
@@ -38,7 +42,7 @@ export default {
   },
   data() {
     return {
-      msg: 'Tabell'
+      title: 'Tabell'
     }
   },
   computed: {
@@ -52,6 +56,13 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
 @import "../assets/scss/5_objects/objects.content";
+.c-logo {
+  margin: 0 auto;
+  width: 10rem;
+}
+.c-page-start {
+  text-align: center;
+}
 .c-table {
   width: 100%;
   &__max {

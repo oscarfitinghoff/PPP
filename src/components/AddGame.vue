@@ -1,51 +1,35 @@
 <template>
   <div class="o-content">
+    <div class="c-logo">
+      <img class="c-logo__img" src="../assets/ping-pong-racket.svg">
+    </div>
     <h1 class="c-page-start">{{ title }}</h1>
     <div class="c-competitors">
       <div class="c-competitors__item">
         <h3 class="c-competitors__heading">Vinnare</h3>
-        <div class="c-competitor" @click="removePlayer('0')" v-bind:class="{ 'is-active': game[0].name.length > 0 }">
-          <div class="c-competitor__img-wrapper">
-            <img src="" alt="">
-          </div>
-          <div class="c-competitor__name">{{ game[0].name }}</div>
-        </div>
+          <Competitor :competitor="game[0]" index="0" @clicked="removePlayer"></Competitor>
       </div>
       <div class="c-competitors__item">
         <h3 class="c-competitors__heading">Förlorare</h3>
-        <div class="c-competitor" @click="removePlayer('1')" v-bind:class="{ 'is-active': game[1].name.length > 0 }">
-          <div class="c-competitor__img-wrapper">
-            <img src="" alt="">
-          </div>
-          <div class="c-competitor__name">{{ game[1].name }}</div>
-        </div>
+        <Competitor :competitor="game[1]" index="1" @clicked="removePlayer"></Competitor>
       </div>
     </div>
-    <div class="c-add-game" v-if="done">
-      <button class="c-btn c-add-game__action" @click="addGame">Lägg till match</button>
+    <div class="c-add-game" v-bind:class="{'is-hidden': !done}">
+      <button class="button is-success c-add-game__action" @click="addGame">Lägg till match</button>
     </div>
-    <div class="c-players" v-else>
-      <div class="c-players__item" v-for="player in players" :key="player.id">
-        <div class="c-player" @click="addPlayer(player)">{{ player.name }}</div>
-      </div>
+    <div class="buttons is-centered" v-bind:class="{'is-hidden': done}">
+      <button class="button is-primary" v-for="player in players" :key="player.id" :data-key="player['.key']">
+        <div class="" @click="addPlayer(player)">{{ player.name }}</div>
+      </button>
     </div>
-    <div class="c-create-player">
-      <h3>Lägg till ny spelare</h3>
-      <div class="field has-addons">
-        <div class="control is-expanded">
-          <input class="input" type="text" v-model="newPlayer">
-        </div>
-        <div class="control">
-          <a class="button is-link" type="button" @click="createPlayer(newPlayer)">Lägg till spelare</a>
-        </div>
-      </div>
-    </div>
+    <createPlayer></createPlayer>
   </div>
 </template>
 
 <script>
-
 import Firebase from 'firebase'
+import Competitor from './Competitor'
+import CreatePlayer from './CreatePlayer'
 
 const config = {
   version: 'v0_1'
@@ -56,6 +40,10 @@ const playersRef = db.ref(`${config.version}/players`)
 
 export default {
   name: 'AddGame',
+  components: {
+    Competitor,
+    CreatePlayer
+  },
   firebase() {
     return {
       players: playersRef,
@@ -84,7 +72,7 @@ export default {
         }
       ],
       selections: this.players,
-      newPlayer: ''
+      logoUrl: '../assets/ping-pong-racket.svg'
     }
   },
   methods: {
@@ -95,15 +83,24 @@ export default {
       } else if (this.game[1].name.length === 0) {
         index = 1
       }
-      this.game[index].key = player['.key']
+      this.game[index]['.key'] = player['.key']
       this.game[index].name = player.name
+      if (player['.key'] === this.game[0]['.key'] || player['.key'] === this.game[1]['.key']) {
+        const element = document.querySelector(`[data-key="${player['.key']}"]`)
+        element.setAttribute('disabled', true)
+      }
       this.checkIfDone()
     },
     removePlayer(player) {
-      this.game[player].key = ''
-      this.game[player].name = ''
-      this.game[player].img = ''
-      this.done = false
+      console.log(player);
+      if (this.game[player].name.length) {
+        const element = document.querySelector(`[data-key="${this.game[player]['.key']}"]`)
+        element.removeAttribute('disabled', false)
+        this.game[player]['.key'] = ''
+        this.game[player].name = ''
+        this.game[player].img = ''
+        this.done = false
+      }
     },
     checkIfDone() {
       if (this.game[0].name.length !== 0 && this.game[1].name.length !== 0) {
@@ -120,11 +117,11 @@ export default {
       const winner = this.updateWinner({ ...game[0] })
       const loser = this.updateLoser({ ...game[1] })
 
-      playersRef.child(game[0].key).set(winner)
-      playersRef.child(game[1].key).set(loser)
+      playersRef.child(game[0]['.key']).set(winner)
+      playersRef.child(game[1]['.key']).set(loser)
     },
     updateWinner(player) {
-      const temp = this.playersObj[player.key]
+      const temp = this.playersObj[player['.key']]
       temp.wins += 1
       temp.losses = temp.losses
       temp.diff += 1
@@ -132,26 +129,12 @@ export default {
       return temp
     },
     updateLoser(player) {
-      const temp = this.playersObj[player.key]
+      const temp = this.playersObj[player['.key']]
       temp.wins = temp.wins
       temp.losses += 1
       temp.diff -= 1
       delete temp['.key']
       return temp
-    },
-    createPlayer(player) {
-      if (player.length) {
-        const newPlayer = {
-          name: player,
-          img: '',
-          aka: '',
-          wins: 0,
-          losses: 0,
-          diff: 0
-        }
-        playersRef.push(newPlayer)
-        // this.updateStanding(newPlayer)
-      }
     }
   }
 }
@@ -170,6 +153,10 @@ export default {
 .c-page-start {
   text-align: center;
 }
+.c-logo {
+  margin: 0 auto;
+  width: 10rem;
+}
 .c-competitors {
   display: flex;
   &__heading {
@@ -179,52 +166,11 @@ export default {
     flex: 1 1 0px;
   }
 }
-.c-competitor {
-  display: flex;
-  flex-direction: column;
-  margin: $spacing-tiny;
-  background: $white;
-  &.is-active {
-    cursor: pointer;
-  }
-  &__img-wrapper {
-    width: 100%;
-    height: 10rem;
-    margin-bottom: $spacing-tiny;
-    background: $gray-light;
-  }
-  &__name {
-    margin-top: auto;
-    height: 2rem;
-    line-height: 2rem;
-    text-align: center;
-  }
-}
 .c-add-game {
   display: flex;
   justify-content: center;
   &__action {
 
   }
-}
-.c-players {
-  display: flex;
-  flex-wrap: wrap;
-  &__item {
-    flex: 1 1 0px;
-  }
-}
-.c-player {
-  margin: $spacing-small;
-  padding: $spacing;
-  background: $midnight;
-  border-radius: $global-radius;
-  color: $white;
-  font-size: 1.2rem;
-  text-align: center;
-  cursor: pointer;
-}
-.c-create-player {
-  padding: $spacing-small;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="o-content">
+  <div id="app">
     <header class="">
       <nav class="navbar is-info">
         <div class="navbar-menu">
@@ -10,9 +10,6 @@
         </div>
       </nav>
     </header>
-    <div class="c-logo">
-      <img class="c-logo__img" src="./assets/ping-pong-racket.svg">
-    </div>
     <router-view/>
   </div>
 </template>
@@ -39,15 +36,12 @@ export default {
 #app {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  margin-top: 30px;
 }
 body {
   font-family: 'Lato', sans-serif;
 }
-.c-logo {
-  margin: 0 auto;
-  width: 10rem;
+.navbar-menu {
+  @include o-content;
 }
 </style>
 

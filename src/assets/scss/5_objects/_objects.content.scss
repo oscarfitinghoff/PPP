@@ -1,4 +1,8 @@
-.o-content {
+$content-width: 30rem;
+@mixin o-content {
   margin: 0 auto;
-  max-width: 30rem;
+  max-width: $content-width;
+}
+.o-content {
+  @include o-content;
 }
